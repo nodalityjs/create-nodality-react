@@ -1,0 +1,19 @@
+{
+  "name": "create-nodality-react",
+  "version": "1.0.86",
+  "description": "Scaffolding tool for creating Nodality React projects",
+  "main": "bin/index.js",
+  "bin": {
+    "create-nodality-react": "./bin/index.js"
+  },
+  "scripts": {},
+  "keywords": [
+    "nodality",
+    "react",
+    "scaffolding",
+    "create"
+  ],
+  "author": "Filip Vabrousek",
+  "license": "MIT",
+  "dependencies": {}
+}
