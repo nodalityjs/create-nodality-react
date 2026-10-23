@@ -5,12 +5,21 @@ import { resolve, dirname } from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-function copyTemplate(templatePath, destinationPath) {
-  copyFileSync(resolve(__dirname, "../templates", templatePath), destinationPath);
-}
+const FILES = [
+  "index.html",
+  "vite.config.js",
+  "prerender.mjs",
+  // Shipped without the dot: npm leaves every .gitignore out of a published
+  // package, so "templates/.gitignore" never reached users and copying it
+  // threw ENOENT. Renamed back to .gitignore when it is copied, below.
+  "gitignore",
+  "src/spec.js",
+  "src/App.jsx",
+  "src/main.jsx",
+  "src/entry-server.jsx",
+];
 
 function createProject(projectName) {
   const projectPath = resolve(process.cwd(), projectName);
@@ -23,53 +32,59 @@ function createProject(projectName) {
   mkdirSync(projectPath);
   mkdirSync(resolve(projectPath, "src"));
 
-  // Copy templates
-  copyTemplate("index.html", resolve(projectPath, "index.html"));
-  copyTemplate("src/index.js", resolve(projectPath, "src/index.js"));
-  copyTemplate("src/App.js", resolve(projectPath, "src/App.js"));
-  copyTemplate("webpack.config.js", resolve(projectPath, "webpack.config.js"));
+  for (const f of FILES) {
+    const dest = f === "gitignore" ? ".gitignore" : f;
+    copyFileSync(resolve(__dirname, "../templates", f), resolve(projectPath, dest));
+  }
 
-  // Create package.json
   const pkg = {
     name: projectName,
-    version: "1.0.0",
+    private: true,
+    version: "0.0.0",
     type: "module",
     scripts: {
-      build: "webpack",
-      start: "npx serve . -l 4000",
+      dev: "vite",
+      // Three passes: client bundle, server bundle, then prerender — React to
+      // HTML, Nodality into the hosts React leaves behind.
+      build:
+        "vite build && vite build --ssr src/entry-server.jsx --outDir dist-server && node prerender.mjs",
+      preview: "vite preview",
     },
     dependencies: {
-      react: "^18.0.0",
-      "react-dom": "^18.0.0",
-      nodality: "latest",
+      react: "^18.3.1",
+      "react-dom": "^18.3.1",
+      // nodality/react — the <Nodality> host component — first shipped in 1.3.25.
+      nodality: "^1.3.25",
     },
     devDependencies: {
-      webpack: "^5.0.0",
-      "webpack-cli": "^5.0.0",
-      "babel-loader": "^9.0.0",
-      "@babel/core": "^7.0.0",
-      "@babel/preset-env": "^7.0.0",
-      "@babel/preset-react": "^7.0.0",
+      vite: "^5.4.0",
+      "@vitejs/plugin-react": "^4.3.0",
+      // Peer dependency of nodality/ssg — the prerender step runs the same
+      // builder in a simulated DOM.
+      jsdom: "^24.1.0",
     },
   };
-  writeFileSync(resolve(projectPath, "package.json"), JSON.stringify(pkg, null, 2));
+  writeFileSync(
+    resolve(projectPath, "package.json"),
+    JSON.stringify(pkg, null, 2) + "\n",
+  );
 
-  // Install dependencies
   console.log("Installing dependencies...");
-  execSync(`npm install`, { cwd: projectPath, stdio: "inherit" });
+  execSync("npm install", { cwd: projectPath, stdio: "inherit" });
 
-  // Build project
-  console.log("Building with Webpack...");
-  execSync(`npx webpack`, { cwd: projectPath, stdio: "inherit" });
+  console.log(`
+Done.
 
-  console.log(`\nDone! To start your app:
   cd ${projectName}
-  npm run build     # to rebuild
-  npm start         # serve on localhost:4000
+  npm run dev      # develop
+  npm run build    # bundle + prerender to dist/
+  npm run preview  # serve dist/
+
+After a build, open dist/index.html in a text editor: the specification from
+src/spec.js is there as real HTML, before any script runs.
 `);
 }
 
-// Parse CLI arguments
 const args = process.argv.slice(2);
 if (!args[0]) {
   console.error("Usage: npm create nodality-react <project-name>");

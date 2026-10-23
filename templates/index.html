@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>My Nodality React Appa</title>
-</head>
-<body>
-  <div id="root"></div>
-  <script src="dist/bundle.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nodality + React</title>
+    <style>
+      /* Nodality writes explicit colours into the elements it generates
+         (text defaults to rgb(17,17,17)), so the page must declare a light
+         ground of its own — otherwise a browser in dark mode renders dark
+         text on a dark background. Set this deliberately rather than
+         inheriting the user agent's. */
+      html { color-scheme: light; }
+      body { margin: 0; background: #ffffff; color: #111111; }
+    </style>
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

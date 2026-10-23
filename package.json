@@ -1,7 +1,7 @@
 {
   "name": "create-nodality-react",
-  "version": "1.0.86",
-  "description": "Scaffolding tool for creating Nodality React projects",
+  "version": "1.0.88",
+  "description": "Scaffold a React + Vite app that renders Nodality (E, N) specifications, prerendered to static HTML at build time.",
   "main": "bin/index.js",
   "bin": {
     "create-nodality-react": "./bin/index.js"
@@ -15,5 +15,6 @@
   ],
   "author": "Filip Vabrousek",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {},
+  "type": "module"
 }
