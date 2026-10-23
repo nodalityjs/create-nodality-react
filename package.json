@@ -2,6 +2,10 @@
   "name": "create-nodality-react",
   "version": "1.0.88",
   "description": "Scaffold a React + Vite app that renders Nodality (E, N) specifications, prerendered to static HTML at build time.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodalityjs/create-nodality-react.git"
+  },
   "main": "bin/index.js",
   "bin": {
     "create-nodality-react": "./bin/index.js"
